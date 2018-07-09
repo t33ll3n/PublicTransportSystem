@@ -6,14 +6,16 @@ const connection = require('./mysqlConnection');
 const linija = require('./routes/linija');
 const ocena_linije = require('./routes/ocena_linije');
 const postaja = require('./routes/postaja.js');
-const predlogi_linija = require('./routes/predlogi_popravkov_linija');
-const predlogi_popravkov_postaja = require('./routes/predlogi_popravkov_postaja');
+const predlog_popravkov_linija = require('./routes/predlog_popravkov_linija');
+const predlog_popravkov_postaja = require('./routes/predlog_popravkov_postaja');
 const uporabnik = require('./routes/uporabnik');
 const urnik = require('./routes/urnik');
 const vsebuje = require('./routes/vsebuje');
 
 const app = express();
 
+app.set('views', './views');
+app.set('view engine', 'pug');
 app.use(bodyParser.json());
 
 
@@ -27,14 +29,16 @@ connection.connect(function(err){
 });
 
 app.get('/', (req, res) => { // "arrow" function, equals to function (req, res) { ... }
-	res.send("Hello World!") 
+	//res.send("Hello World!") 
+	res.render('index', {title: 'Hello World!', message: 'Pug template engine'});
 });
 
+//routes
 app.use('/api/linija', linija);
 app.use('/api/ocena_linije', ocena_linije);
 app.use('/api/postaja', postaja);
-app.use('/api/predlogi_linija', predlogi_linija);
-app.use('/api/predlogi_popravkov_postaja', predlogi_popravkov_postaja);
+app.use('/api/predlog_popravkov_linija', predlog_popravkov_linija);
+app.use('/api/predlog_popravkov_postaja', predlog_popravkov_postaja);
 app.use('/api/uporabnik', uporabnik);
 app.use('/api/urnik', urnik);
 app.use('/api/vsebuje', vsebuje);

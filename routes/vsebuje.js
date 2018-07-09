@@ -36,7 +36,7 @@ router.post('/', (req, res) => {
 	
 
 	connection.query('INSERT INTO Vsebuje(zaporedna_st, linija_id, postaja_id, razdalja_do_naslednje) VALUES ('
-	 + zaporedna_st +', ' + linija_id + ', ' + postaja_id + ', ' + razdalja_do_naslednje ')', (err, result) => {
+	 + zaporedna_st +', ' + linija_id + ', ' + postaja_id + ', ' + razdalja_do_naslednje + ')', (err, result) => {
 	 	if (err){
 	 		console.log(err.stack);
 	 	}
