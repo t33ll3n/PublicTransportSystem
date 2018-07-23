@@ -1,0 +1,44 @@
+doctype html
+html(lang='en')
+	head
+		title Išči
+		link(rel='stylesheet', type='text/css', href='vendor/bootstrap/css/bootstrap.min.css')
+		link(rel='stylesheet', type='text/css', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
+		meta(charset='utf-8')
+		meta(http-equiv='X-UA-Compatible', content='IE=edge')
+		meta(name='viewport', content='width=device-width, initial-scale=1')
+		link(rel='stylesheet', href='css/navbar.css')
+		script(src='http://code.jquery.com/jquery-latest.min.js', type='text/javascript')
+		link(rel='stylesheet', type='text/css', href='fonts/font-awesome-4.7.0/css/font-awesome.min.css')
+		//======================================================================
+		link(rel='stylesheet', type='text/css', href='css/search.css')
+	body
+		include includes/navbar
+		.container
+			.row
+				#fields.control-group
+					label.control-label(for='field1') Vnesi novo pot
+					.controls
+						form(role='form', autocomplete='off')
+							.entry.input-group.col-xs-6
+								input.form-control#zacetek(name='zacetek', type='text', placeholder='Vnesi začetni kraj')
+								input.form-control#konec(name='konec', type='text', placeholder='Vnesi končni kraj')
+								input.form-control#dan(name='datum', type='date')
+						br
+						button.btn.btn-success(onclick='submiteDesiredLine()')  Pošlji
+						script(src='vendor/jquery/jquery-3.2.1.min.js')
+			br
+			#message
+			.results
+				table#result
+					thead
+						th Linija
+						th Vstopna postaja
+						th Prihod
+						th Izstopna postaja
+						th Prihod
+					tbody
+		script(src='js/search.js')
+		script(src='vendor/bootstrap/js/popper.js')
+		//script(src='vendor/bootstrap/js/bootstrap.min.js')
+		script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')

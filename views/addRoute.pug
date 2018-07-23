@@ -1,0 +1,48 @@
+doctype html
+html
+  head
+    title Dodaj novo linijo
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    //======================================================================
+    link(rel='stylesheet', type='text/css', href='vendor/bootstrap/css/bootstrap.min.css')
+    link(rel='stylesheet', type='text/css', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
+    meta(charset='utf-8')
+    link(rel='stylesheet', href='css/navbar.css')
+    script(src='http://code.jquery.com/jquery-latest.min.js', type='text/javascript')
+    link(rel='stylesheet', type='text/css', href='fonts/font-awesome-4.7.0/css/font-awesome.min.css')
+    //======================================================================
+    link(rel='stylesheet', type='text/css', href='css/addRoute.css')
+  body
+    include includes/navbar.pug
+    .container
+      .row
+        #fields.control-group
+          label.control-label(for='field1') Vnesi novo pot
+          #message
+          .controls
+            form(role='form', autocomplete='off')
+              .entry.input-group.col-xs-6
+                input.form-control.zacetek(name='zacetek', type='text', placeholder='Vnesi začetni kraj')
+                input.form-control.konec(name='konec', type='text', placeholder='Vnesi končni kraj')
+                input#vikend(name='isHoliday', type='checkbox', label='Vikend')
+                |  Vikend
+              .entry.input-group.postaje.col-xs-6
+                input.form-control.postaja(name='postaja', type='text', placeholder='Vnesi ime postaje')
+                input.form-control.cas(name='cas', type='time', placeholder='Vnesi čas prihoda avtobusa')
+                .input-group-btn
+                  button.btn.btn-success.btn-add(type='button')
+                    .glyphicon.glyphicon-plus
+                  button.btn.btn-danger.btn-remove(type='button')
+                    .glyphicon.glyphicon-minus
+            br
+            small
+              | Press 
+              span.glyphicon.glyphicon-plus.gs
+              |  to add another form field
+          button.btn.btn-success(onclick='readValues()')  submit
+    script(src='vendor/jquery/jquery-3.2.1.min.js')
+    script(src='js/addRoute.js')
+    script(src='vendor/bootstrap/js/popper.js')
+    //script(src='vendor/bootstrap/js/bootstrap.min.js')
+    script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')

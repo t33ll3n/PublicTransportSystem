@@ -10,9 +10,8 @@ create table Uporabnik (
 );
 
 create table Linija (
-	linija_id int not null autoincrement,
+	linija_id int not null auto_increment,
 	linija_ime varchar(255) not null,
-	isHoliday bool not null,
 	isChecked bool not null,
 	PRIMARY KEY (linija_id)
 );
@@ -37,20 +36,21 @@ create table Ocena_linije (
 );
 
 create table Urnik (
-	id int not null,
+	id int not null auto_increment,
 	linija_id int not null,
 	zacetni_cas time not null,
+    isHoliday bool not null,
 	PRIMARY KEY (id),
 	FOREIGN KEY (linija_id) REFERENCES linija (linija_id)
 );
 
 create table Vsebuje (
-	id int not null,
+	id int not null auto_increment,
 	zaporedna_st int not null,
 	linija_id int not null,
 	postaja_id int not null,
-	razdalja_do_naslednje int not null,
-	PRIMARY KEY (linija_id, postaja_id),
+	cas_prihoda varchar(5) not null,
+	PRIMARY KEY (id),
 	FOREIGN KEY (linija_id) REFERENCES Linija (linija_id),
 	FOREIGN KEY (postaja_id) REFERENCES Postaja (postaja_id)
 );

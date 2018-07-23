@@ -68,6 +68,10 @@ app.get('/', sessionChecker, (req, res) => { // "arrow" function, equals to func
 	console.log(req.session);
 });
 
+app.get('/register', (req, res) => {
+	res.render('register');
+});
+
 app.post('/register', (req, res) => {
 
 	let username = req.body.username;
@@ -84,7 +88,7 @@ app.post('/register', (req, res) => {
 	 	}
 	 	console.log('result: ' + result);
 	 	res.redirect('/login');
-	 	res.render('login', {message: 'Uspesno ste se registrirali. Za nadavljevanje se prosim prijavite.'});
+	 	//res.render('login', {message: 'Uspesno ste se registrirali. Za nadavljevanje se prosim prijavite.'});
 	 });
 	});
 	 
@@ -129,7 +133,7 @@ app.post('/login', (req, res, next) => {
 					return res.redirect('/account');
 				} else {
 					console.log('password incorrect');
-					return res.render('/login', {message: 'Uporabniško ime ali geslo ni pravilno'});
+					return res.render('login', {message: 'Uporabniško ime ali geslo ni pravilno'});
 				}
 			});	
 		}
@@ -149,11 +153,129 @@ app.get('/logout', (req, res) => {
 
 app.get('/account', (req, res) => {
     if (req.session.user && req.cookies.user_sid) {
-        //res.sendFile(__dirname + '/public/dashboard.html');
-        res.send('/account');
+        res.render('account');
     } else {
         res.redirect('/login');
     }
+});
+
+app.get('/addRoute', (req, res) => {
+	if (req.session.user && req.cookies.user_sid) {
+		res.render('addRoute');
+	} else {
+		res.redirect('/login');
+	}
+});
+
+app.post('/addRoute', (req, res) => {
+	//console.log(req.body);
+
+	let linija = req.body.linija;
+	let isHoliday = req.body.isHoliday;
+	let postaje = req.body.postaje;
+	var linija_id;
+
+	var query = 'INSERT INTO Linija (linija_ime, isChecked) select * from (select "'+ linija +'", '+ true +') AS tmp WHERE NOT EXISTS (select linija_ime from Linija WHERE linija_ime = "'+ linija +'") LIMIT 1';
+	connection.query(query, (err, result) => {
+		if (err) {
+			console.log('err1');
+			console.log(err);
+			res.send(err);
+			return;
+		} else {
+			console.log('insert linija');
+
+			query = 'select linija_id from linija where linija_ime = "'+ linija +'"';
+			connection.query(query, (err, rows, fields) => {
+				if (err) {
+					console.log('err2');
+					res.send(err);
+					return;
+				} else {
+					linija_id = rows[0].linija_id;
+					console.log('linija id: ' + linija_id);
+
+					for (let i = 0; i < postaje.length; i++){
+						let postaja = postaje[i].postaja;
+						let cas = postaje[i].cas;
+						//console.log(cas);
+						ura = '0000-00-00 0' + cas + ':00';
+
+						if(i == 0){
+							query = 'INSERT INTO Urnik(linija_id, zacetni_cas, isHoliday) values ('+ linija_id +', "'+ ura +'", '+ isHoliday +')';
+							connection.query(query, (err, result) => {
+								if (err){
+									console.log('err3');
+									console.log(err);
+									res.send(err);
+								} else {
+									console.log('insert urnik');
+								}
+							});			
+						}
+
+						query = 'INSERT INTO Postaja (postaja_ime, isChecked) select * from (select "'+ postaja +'", '+ true +') AS tmp WHERE NOT EXISTS (select postaja_ime from Postaja WHERE postaja_ime = "'+ postaja +'") LIMIT 1';
+						connection.query(query, (err, result) => {
+							if (err) {
+								console.log('err4');
+								console.log(err);
+								res.send(err);
+								return;
+							} else {
+								console.log('insert postaja');
+
+								var postaja_id;
+								query = 'select postaja_id from postaja where postaja_ime = "'+ postaja +'"';
+								connection.query(query, (err, rows, fields) => {
+									if (err) {
+										console.log('err5');
+										res.send(err);
+										return;
+									} else {
+										postaja_id = rows[0].postaja_id;
+										console.log('postaja id: ' + postaja_id);
+
+										query = 'INSERT INTO Vsebuje(zaporedna_st, linija_id, postaja_id, cas_prihoda) values ("'+ i +'", '+ linija_id +', '+ postaja_id +', "'+ cas +'")';
+										connection.query(query, (err, result) => {
+											if (err) {
+												console.log('err6');
+												console.log(err);
+												res.send(err);
+											} else {
+												console.log('insert vsebuje');
+												res.end();
+											}
+										});
+									}
+								});
+							}
+						});
+					}
+				}
+			});
+		}
+	});	
+});
+
+app.get('/search', (req, res) => {
+	res.render('search');
+});
+
+app.post('/search', (req, res) => {
+	let zac_postaja = req.body.zacetna_postaja;
+	let kon_postaja = req.body.koncna_postaja;
+	let datum = req.body.datum;
+
+	isHoliday = isWeekend(datum);
+	console.log('date: ' + isHoliday);
+
+	let query = 'select li.linija_ime as linija, po.postaja_ime as vstop, ur.zacetni_cas vstop_prihod, ko.postaja_ime as izstop, vs2.cas_prihoda as izstop_prihod FROM linija li JOIN Vsebuje vs ON (vs.linija_id = li.linija_id) JOIN Postaja po ON (po.postaja_id = vs.postaja_id) JOIN Urnik ur ON (ur.linija_id = li.linija_id) JOIN Vsebuje vs2 ON (vs2.linija_id = li.linija_id) JOIN Postaja ko ON (ko.postaja_id = vs2.postaja_id) WHERE po.postaja_ime = "' + zac_postaja + '" and ko.postaja_ime = "' + kon_postaja +'" and isHoliday = ' + isHoliday;
+	connection.query(query, (err, rows, fields) => {
+		if (err)
+			res.send(err);
+		res.status(200).send(rows);
+	});
+
 });
 
 app.use(function (req, res, next) {
@@ -169,6 +291,16 @@ app.use('/api/predlog_popravkov_postaja', predlog_popravkov_postaja);
 app.use('/api/uporabnik', uporabnik);
 app.use('/api/urnik', urnik);
 app.use('/api/vsebuje', vsebuje);
+
+function isWeekend(dateInHtml){
+	let dateSplit = dateInHtml.split('-');
+	let date = new Date(dateSplit[0], dateSplit[1]-1, dateSplit[2]);
+	console.log(date + ': ' +date.getDay());
+
+	if (date.getDay() == 6 || date.getDay() == 0)
+		return true;
+	return false;
+}
 
 app.listen(3000, () => { // "arrow" function, equals to function (req, res) { ... }
 	console.log('Listening on port 3000...');
