@@ -1,0 +1,16 @@
+table, th, tr, td {
+	border: 1px solid;
+}
+
+tr td {
+	padding: 5px;
+}
+
+.hidden {
+	display:none;
+}
+
+button {
+	display: inline;
+	margin: 4px;
+}

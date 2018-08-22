@@ -1,0 +1,39 @@
+html
+  head
+    title Oceni linijo
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='stylesheet', href='css/navbar.css')
+    link(rel='stylesheet', type='text/css', href='fonts/font-awesome-4.7.0/css/font-awesome.min.css')
+    link(rel='stylesheet', type='text/css', href='vendor/bootstrap/css/bootstrap.min.css')
+    link(rel='stylesheet', type='text/css', href='css/rate.css')
+  body
+    include includes/navbar
+    .container
+      .row
+        form(autocomplete='off', role="form", method='post', action='rate')
+          .entry.input-group
+            input#linija(type='text', name='linija', placeholder='vnesi linijo')
+          .input-group-btn
+            button.btn.btn-success(type='button', onclick='sendData()') Išči
+      .row
+        #message
+        .results
+      .row
+        table#result
+          thead
+            th.hidden Linija_id
+            th Linija
+            th Postaja
+            th Prihod
+            th 
+          tbody
+      .row
+        button.btn.btn-warning#edit(type="button", onclick="toggleEdit()") Uredi
+        button.btn.btn-success(type="button", onclick="submitRating()") Pošlji
+    script(src='js/rate.js')
+    script(src='vendor/jquery/jquery-3.2.1.min.js')
+    script(src='vendor/bootstrap/js/popper.js')
+    //script(src='vendor/bootstrap/js/bootstrap.min.js')
+    script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')

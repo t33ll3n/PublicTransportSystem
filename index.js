@@ -173,7 +173,7 @@ app.post('/addRoute', (req, res) => {
 	let linija = req.body.linija;
 	let isHoliday = req.body.isHoliday;
 	let postaje = req.body.postaje;
-	var linija_id;
+	var linija_id, urnik_id;
 
 	var query = 'INSERT INTO Linija (linija_ime, isChecked) select * from (select "'+ linija +'", '+ true +') AS tmp WHERE NOT EXISTS (select linija_ime from Linija WHERE linija_ime = "'+ linija +'") LIMIT 1';
 	connection.query(query, (err, result) => {
@@ -210,6 +210,15 @@ app.post('/addRoute', (req, res) => {
 									res.send(err);
 								} else {
 									console.log('insert urnik');
+									query = 'select MAX(urnik_id) as urnik_id from Urnik';
+									connection.query(query, (err, rows, fields) => {
+										if (err){
+											console.log(err);
+										} else {
+											console.log(rows[0]);
+											urnik_id = rows[0].urnik_id;
+										}
+									})
 								}
 							});			
 						}
@@ -235,7 +244,7 @@ app.post('/addRoute', (req, res) => {
 										postaja_id = rows[0].postaja_id;
 										console.log('postaja id: ' + postaja_id);
 
-										query = 'INSERT INTO Vsebuje(zaporedna_st, linija_id, postaja_id, cas_prihoda) values ("'+ i +'", '+ linija_id +', '+ postaja_id +', "'+ cas +'")';
+										query = 'INSERT INTO Vsebuje(zaporedna_st, linija_id, postaja_id, urnik_id, cas_prihoda) values ("'+ i +'", '+ linija_id +', '+ postaja_id +', '+ urnik_id +', "'+ cas +'")';
 										connection.query(query, (err, result) => {
 											if (err) {
 												console.log('err6');
@@ -278,9 +287,135 @@ app.post('/search', (req, res) => {
 
 });
 
+app.get('/rate', (req, res) => {
+	if (req.session.user && req.cookies.user_sid) {
+		res.render('rate');
+	} else {
+		res.redirect('/login');
+	}
+});
+
+app.post('/rate', (req,  res) => {
+	if (req.session.user && req.cookies.user_sid) {
+		//do nothing
+	} else {
+		res.redirect('/login');
+	}
+
+	let linija_ime = req.body.linija;
+	console.log(linija_ime);
+
+	let query = 'select li.linija_id, vs.id, vs.urnik_id, linija_ime, po.postaja_ime, cas_prihoda, zaporedna_st from linija li join vsebuje vs on (vs.linija_id = li.linija_id) join postaja po on (po.postaja_id = vs.postaja_id) where linija_ime ="'+linija_ime +'" order by urnik_id, cas_prihoda, zaporedna_st;'
+	//console.log('got /rate post req');
+	connection.query(query, (err, rows, fields) => {
+		if (err) {
+			res.send(err);
+			return;
+		}
+		console.log(rows.length);
+		res.status(200).send(rows);
+	})
+});
+
+app.post('/rating', (req, res) => {
+	
+	if (req.session.user && req.cookies.user_sid) {
+		//do nothing
+		console.log(req.session.user);
+		console.log(req.cookies.user__sid);
+	} else {
+		res.redirect('/login');
+		console.log(req.session.user);
+		console.log(req.cookies.user__sid);
+		return;
+	}
+
+	//console.log(req.body);
+	let pravilni = req.body.pravilni;
+	let popravki = req.body.popravki;
+
+	if(!req.body){
+		console.log('Data is null');
+		res.end();
+		return;
+	}
+	
+
+	console.log(req.body.pravilni);
+	console.log(req.body.popravki);
+	
+	if (pravilni){
+		for (let i = 0; i < pravilni.length; i++){
+			let vs_id = pravilni[i].vsebuje_id;
+			let rating = pravilni[i].isChecked;
+			let user_id = req.session.user.uporabnik_id;
+
+			let query = 'INSERT INTO ocena_linije(vsebuje_id, uporabnik_id, ocena) values (' + vs_id +', ' + user_id + ', '+ rating +')';
+			connection.query(query, (err, result) => {
+				if (err){
+					console.log('Ocena neuspešno vpisana.');
+					console.log(err);
+					res.send(err);
+					return;
+				}
+				console.log('Ocena dodana.')
+				res.end();
+			});
+		}
+	}
+
+	if(popravki){
+		for (let i = 0; i < popravki.length; i++){
+		let popravek = popravki[i];
+		let user_id = req.session.user.uporabnik_id
+
+		if(popravek.postaja_ime){
+			let query = 'INSERT INTO predlogi_popravkov(tip_napake, predlagan_popravek, status, vsebuje_id) values("napacno ime postaje", "'+ popravek.postaja_ime +'", false, ' + popravek.vsebuje_id + ', '+ user_id +')';
+			connection.query(query, (err, result) => {
+				if (err) {
+					console.log('NAPAKA PRI VSTAVLJANJU POPRAVKA V PODATKOVNO BAZO =>');
+					console.log(err);
+					return;
+				}
+				console.log('Popravek vnesen v bazo!');
+
+			});
+		}
+		if (popravek.linija_ime){
+			let query = 'INSERT INTO predlogi_popravkov(tip_napake, predlagan_popravek, status, vsebuje_id) values("napacno ime linije", "'+ popravek.linija_ime +'", false, ' + popravek.vsebuje_id + ', '+ user_id +')';
+			connection.query(query, (err, result) => {
+				if (err) {
+					console.log('NAPAKA PRI VSTAVLJANJU POPRAVKA V PODATKOVNO BAZO =>');
+					console.log(err);
+					return;
+				}
+				console.log('Popravek vnesen v bazo!');
+
+			});
+		}
+		if (popravek.cas_prihoda){
+			let query = 'INSERT INTO predlogi_popravkov(tip_napake, predlagan_popravek, status, vsebuje_id) values("napacen cas prihoda", "'+ popravek.cas_prihoda +'", false, ' + popravek.vsebuje_id + ', '+ user_id +')';
+			connection.query(query, (err, result) => {
+				if (err) {
+					console.log('NAPAKA PRI VSTAVLJANJU POPRAVKA V PODATKOVNO BAZO =>');
+					console.log(err);
+					return;
+				}
+				console.log('Popravek vnesen v bazo!');
+
+			});
+		}
+		
+		}	
+	}
+	
+});
+
 app.use(function (req, res, next) {
   res.status(404).send("Sorry can't find that!")
 });
+
+
 
 //routes
 app.use('/api/linija', linija);

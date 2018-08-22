@@ -8,8 +8,20 @@ html
 		script(src='http://code.jquery.com/jquery-latest.min.js', type='text/javascript')
 		link(rel='stylesheet', type='text/css', href='fonts/font-awesome-4.7.0/css/font-awesome.min.css')
 		link(rel='stylesheet', type='text/css', href='vendor/bootstrap/css/bootstrap.min.css')
+		link(rel='stylesheet', type='text/css', href='css/index.css')
 	body
 		include includes/navbar
+		.mainImage
+			img(src="images/jumbotron.jpg")
+			.centered
+				p
+				.
+					Public Transport System <br>
+					Načrtjujte svojo pot z našo aplikacijo
+				input(type="text", placeholder="Vnesi začetno postajo")
+				input(type="text", placeholder="Vnesi končno postajo")
+				br
+				button.btn.btn-success Išči
 		.container
 			p Spletna aplikacija je namenjena iskanju avtubusnih linij.
-			p Sistem s podatki dopolnjujejo uporabnika sami. Zato je uporaba na lastno odgovornost.
+			p Sistem s podatki dopolnjujejo uporabniki sami. Zato je uporaba na lastno odgovornost.
